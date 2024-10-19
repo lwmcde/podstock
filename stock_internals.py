@@ -13,7 +13,7 @@ def count_trend_after_direction_change(stock_data, n, trend_up=True, direction=F
 
     while i < len(close_prices) - n:
         
-        if (close_prices[i] > close_prices[i - 1] if direction else close_prices[i] < close_prices[i - 1]):
+        if (close_prices[i] <= close_prices[i - 1] if trend_up else close_prices[i] >= close_prices[i - 1]):
 
             streak_valid = True
 
@@ -25,10 +25,13 @@ def count_trend_after_direction_change(stock_data, n, trend_up=True, direction=F
 
                     break
 
-            if streak_valid:
-
-                count += 1
-                i += n
+            if streak_valid and i + n < len(close_prices) - 1:
+                if (close_prices[i+ n + 1] >= close_prices[i+n] if direction else close_prices[i+ n + 1] <= close_prices[i+n]):
+                    print(close_prices[i])
+                    count += 1
+                    i += n
+                else:
+                    i+= 1
 
             else:
 
@@ -45,17 +48,25 @@ def get_df_given_inputs(n, start_date, end_date, stock_tickers):
     data = yf.download(stock_tickers, start=start_date, end=end_date)['Close']
     data.index = pd.to_datetime(data.index)
 
+    print(data)
+
     results = []
     for column in data.columns:
-        up_down = count_trend_after_direction_change(data[column], n, trend_up=False, direction=True)
+        
+        print()
+        print("updown")
+        up_down = count_trend_after_direction_change(data[column], n, trend_up=True, direction=False)
+        print("upup")
         up_up = count_trend_after_direction_change(data[column], n, trend_up=True, direction=True)
         pup = 0
         if (up_up + up_down) > 0:
             pup = up_up/(up_up + up_down)
         else:
             pup = 0
+        print("down down")
         down_down = count_trend_after_direction_change(data[column], n, trend_up=False, direction=False)
-        down_up = count_trend_after_direction_change(data[column], n, trend_up=True, direction=False)
+        print("down up")
+        down_up = count_trend_after_direction_change(data[column], n, trend_up=False, direction=True)
         pdown = 0
         if (down_down + down_up) > 0:
             pdown = down_up/(down_down + down_up)
