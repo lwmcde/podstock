@@ -48,24 +48,17 @@ def get_df_given_inputs(n, start_date, end_date, stock_tickers):
     data = yf.download(stock_tickers, start=start_date, end=end_date)['Close']
     data.index = pd.to_datetime(data.index)
 
-    print(data)
-
     results = []
     for column in data.columns:
         
-        print()
-        print("updown")
         up_down = count_trend_after_direction_change(data[column], n, trend_up=True, direction=False)
-        print("upup")
         up_up = count_trend_after_direction_change(data[column], n, trend_up=True, direction=True)
         pup = 0
         if (up_up + up_down) > 0:
             pup = up_up/(up_up + up_down)
         else:
             pup = 0
-        print("down down")
         down_down = count_trend_after_direction_change(data[column], n, trend_up=False, direction=False)
-        print("down up")
         down_up = count_trend_after_direction_change(data[column], n, trend_up=False, direction=True)
         pdown = 0
         if (down_down + down_up) > 0:
